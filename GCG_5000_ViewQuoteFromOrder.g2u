@@ -1,0 +1,164 @@
+Program.Sub.Preflight.Start
+V.Global.sError.Declare
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+'Author Bix
+'Date 5/3/2018
+'GCG_5000
+'Hook Checks
+F.Intrinsic.Control.If(V.Caller.Hook,=,11560)
+	F.Intrinsic.Control.CallSub(Hook11560)
+F.Intrinsic.Control.ElseIf(V.Caller.Hook,=,11565)
+	F.Intrinsic.Control.CallSub(Hook11565)
+F.Intrinsic.Control.ElseIf(V.Caller.Hook,=,11930)
+	F.Intrinsic.Control.CallSub(Hook11930)
+F.Intrinsic.Control.ElseIf(V.Caller.Hook,=,33001)
+	F.Intrinsic.Control.CallSub(Hook33001)
+F.Intrinsic.Control.ElseIf(V.Caller.Hook,=,33004)
+	F.Intrinsic.Control.CallSub(Hook33004)
+F.Intrinsic.Control.EndIf
+
+Program.Sub.Main.End
+
+Program.Sub.Hook11560.Start
+F.Intrinsic.Control.Try
+	
+	F.Intrinsic.Variable.SetProperty("GAB-LBL-3","PL",736)
+	F.Intrinsic.Variable.SetProperty("GAB-LBL-3","PT",528)
+	F.Intrinsic.Variable.SetProperty("GAB-LBL-3","PH",13)
+	F.Intrinsic.Variable.SetProperty("GAB-LBL-3","PW",85)
+	F.Intrinsic.Variable.SetProperty("GAB-TEXT-3","PL",736)
+	F.Intrinsic.Variable.SetProperty("GAB-TEXT-3","PT",543)
+	V.Passed.GAB-LBL-3.Set("Quote Number")
+	V.Passed.000203.Set("Open Quote")
+	
+F.Intrinsic.Control.Catch
+	F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Global.sError)
+	F.Intrinsic.UI.Msgbox(V.Global.sError)
+	F.Intrinsic.Control.End
+F.Intrinsic.Control.EndTry
+Program.Sub.Hook11560.End
+
+Program.Sub.Hook11565.Start
+F.Intrinsic.Control.Try
+	V.Local.sSQL.Declare
+	
+	F.Intrinsic.String.LPad(V.Passed.000003,"0",7,V.Local.sSQL)
+	F.Intrinsic.String.Build("select QUOTE from V_ORDER_HEADER where ORDER_NO = '{0}' and CUSTOMER_PO = '{1}'",V.Local.sSQL,V.Passed.000025,V.Local.sSQL)
+	
+	F.Intrinsic.Control.CallSub(OpenConnection)
+	F.ODBC.Connection!con.ExecuteAndReturn(V.Local.sSQL,V.Local.sSQL)
+	F.Intrinsic.Control.CallSub(CloseConnection)
+	
+	V.Passed.GAB-TEXT-3.Set(V.Local.sSQL)
+	
+F.Intrinsic.Control.Catch
+	F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Global.sError)
+	F.Intrinsic.UI.Msgbox(V.Global.sError)
+	F.Intrinsic.Control.End
+F.Intrinsic.Control.EndTry
+Program.Sub.Hook11565.End
+
+Program.Sub.Hook11930.Start
+F.Intrinsic.Control.Try
+	V.Local.sSQL.Declare
+	V.Local.sRet.Declare
+	
+	F.Intrinsic.String.LPad(V.Passed.000003,"0",7,V.Local.sRet)
+	F.Intrinsic.String.Build("select QUOTE from V_ORDER_HEADER where ORDER_NO = '{0}' and CUSTOMER_PO = '{1}'",V.Local.sRet,V.Passed.000025,V.Local.sSQL)
+	
+	F.Intrinsic.Control.CallSub(OpenConnection)
+	F.ODBC.Connection!con.ExecuteAndReturn(V.Local.sSQL,V.Local.sRet)
+	F.Intrinsic.String.Split(V.Local.sRet,"#$#",V.Local.sRet)
+	F.Intrinsic.String.Build("select 1 from V_QUOTE_HEADER where QUOTE_NO = '{0}'",V.Local.sRet,V.Local.sSQL)
+	F.ODBC.Connection!con.ExecuteAndReturn(V.Local.sSQL,V.Local.sSQL)
+	F.Intrinsic.Control.CallSub(CloseConnection)
+	
+	F.Intrinsic.Control.If(V.Local.sSQL,!=,"1")
+		F.Intrinsic.String.Build("Quote {0} does not exist in Quote Header DataBase Table.",V.Local.sRet,V.Local.sSQL)
+		F.Intrinsic.UI.Msgbox(V.Local.sSQL,"Exiting 'Open Quote' Module")
+		F.Intrinsic.Control.ExitSub
+	F.Intrinsic.Control.EndIf
+	
+	F.Intrinsic.String.Build("{0}!*!O",V.Local.sRet,V.Local.sRet)
+	
+	F.Global.General.CallWrapperAsync(251000,V.Local.sRet)
+	
+F.Intrinsic.Control.Catch
+	F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Global.sError)
+	F.Intrinsic.UI.Msgbox(V.Global.sError)
+	F.Intrinsic.Control.End
+F.Intrinsic.Control.EndTry
+Program.Sub.Hook11930.End
+
+Program.Sub.Hook33001.Start
+'Change Script 3 button to "Copy Quote" on Order History by Order Number
+F.Intrinsic.Control.Try
+	
+	V.Passed.000160.Set("View Quote")
+	
+F.Intrinsic.Control.Catch
+	F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Global.sError)
+	F.Intrinsic.UI.Msgbox(V.Global.sError)
+	F.Intrinsic.Control.End
+F.Intrinsic.Control.EndTry
+Program.Sub.Hook33001.End
+
+Program.Sub.Hook33004.Start
+'Opens Copy Quote screen
+'If quote attached to order does not exist in quote header, exit Sub
+F.Intrinsic.Control.Try
+	V.Local.sSQL.Declare
+	V.Local.sRet.Declare
+	
+	F.Intrinsic.String.LPad(V.Passed.000002,"0",7,V.Local.sRet)
+	F.Intrinsic.String.Build("select QUOTE from V_ORDER_HIST_HEAD where ORDER_NO = '{0}' and CUSTOMER_PO = '{1}'",V.Local.sRet,V.Passed.000008,V.Local.sSQL)
+	
+	F.Intrinsic.Control.CallSub(OpenConnection)
+	F.ODBC.Connection!con.ExecuteAndReturn(V.Local.sSQL,V.Local.sRet)
+	F.Intrinsic.String.Split(V.Local.sRet,"#$#",V.Local.sRet)
+	F.Intrinsic.String.Build("select 1 from V_QUOTE_HEADER where QUOTE_NO = '{0}'",V.Local.sRet,V.Local.sSQL)
+	F.ODBC.Connection!con.ExecuteAndReturn(V.Local.sSQL,V.Local.sSQL)
+	F.Intrinsic.Control.CallSub(CloseConnection)
+	
+	F.Intrinsic.Control.If(V.Local.sSQL,!=,"1")
+		F.Intrinsic.String.Build("Quote {0} does not exist in Quote Header DataBase Table.",V.Local.sRet,V.Local.sSQL)
+		F.Intrinsic.UI.Msgbox(V.Local.sSQL,"Exiting 'View Quote' Module")
+		F.Intrinsic.Control.ExitSub
+	F.Intrinsic.Control.EndIf
+	
+	F.Intrinsic.String.Build("{0}!*!V",V.Local.sRet,V.Local.sRet)
+	
+	F.Global.General.CallWrapperAsync(251000,V.Local.sRet)
+	
+F.Intrinsic.Control.Catch
+	F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Global.sError)
+	F.Intrinsic.UI.Msgbox(V.Global.sError)
+	F.Intrinsic.Control.End
+F.Intrinsic.Control.EndTry
+Program.Sub.Hook33004.End
+
+Program.Sub.OpenConnection.Start
+F.Intrinsic.Control.Try
+	
+	F.ODBC.Connection!con.OpenCompanyConnection
+	
+F.Intrinsic.Control.Catch
+	F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Global.sError)
+	F.Intrinsic.UI.Msgbox(V.Global.sError)
+	F.Intrinsic.Control.End
+F.Intrinsic.Control.EndTry
+Program.Sub.OpenConnection.End
+
+Program.Sub.CloseConnection.Start
+F.Intrinsic.Control.Try
+	
+	F.ODBC.Connection!con.Close
+	
+F.Intrinsic.Control.Catch
+	F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}",V.Ambient.ScriptPath,V.Ambient.Newline,V.Ambient.CurrentSubroutine,V.Ambient.ErrorNumber,V.Ambient.ErrorDescription,V.Ambient.GABVersion,V.Global.sError)
+	F.Intrinsic.UI.Msgbox(V.Global.sError)
+	F.Intrinsic.Control.End
+F.Intrinsic.Control.EndTry
+Program.Sub.CloseConnection.End
